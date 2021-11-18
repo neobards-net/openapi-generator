@@ -424,12 +424,19 @@ inline bool TryGetJsonValue(const TSharedPtr<FJsonValue>& JsonValue, TMap<FStrin
 }
 
 template<typename T>
-inline bool TryGetJsonValue(const TSharedPtr<FJsonObject>& JsonObject, const FString& Key, T& Value)
+inline bool TryGetJsonValue(const TSharedPtr<FJsonObject>& JsonObject, const FString& Key, T& Value, const bool IsNullable = false)
 {
 	const TSharedPtr<FJsonValue> JsonValue = JsonObject->TryGetField(Key);
-	if (JsonValue.IsValid() && !JsonValue->IsNull())
+	if (JsonValue.IsValid())
 	{
-		return TryGetJsonValue(JsonValue, Value);
+		if (JsonValue->IsNull())
+		{
+			return IsNullable;	// assume parsing null string successfully by IsNullable
+		}
+		else
+		{
+			return TryGetJsonValue(JsonValue, Value);
+		}
 	}
 	return false;
 }
